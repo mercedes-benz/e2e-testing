@@ -4,7 +4,8 @@ dependencies:
 - alias: daps
   condition: install.daps
   name: daps-server
-  repository: https://eclipse-tractusx.github.io/charts/dev
+  # repository: https://eclipse-tractusx.github.io/charts/dev
+  repository: file://./charts/daps-server
   version: 1.7.10
 - alias: vault
   condition: install.vault
