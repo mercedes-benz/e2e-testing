@@ -5,4 +5,5 @@ name: daps-server
 sources:
 - https://github.com/eclipse-tractusx/daps-helm-chart
 type: application
-version: 1.7.10
+# This version is v1.7.10 with manual added PR41
+version: 1.7.10-with-PR41
