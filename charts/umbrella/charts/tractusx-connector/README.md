@@ -1,14 +1,57 @@
 # tractusx-connector
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.3.0](https://img.shields.io/badge/AppVersion-0.3.0-informational?style=flat-square)
+![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.1](https://img.shields.io/badge/AppVersion-0.4.1-informational?style=flat-square)
 
-A Helm chart for Tractus-X Eclipse Data Space Connector
+A Helm chart for Tractus-X Eclipse Data Space Connector. The connector deployment consists of two runtime consists of a
+Control Plane and a Data Plane. Note that _no_ external dependencies such as a PostgreSQL database and HashiCorp Vault are included.
 
-## TL;DR
+This chart is intended for use with an _existing_ PostgreSQL database and an _existing_ HashiCorp Vault.
+
+**Homepage:** <https://github.com/eclipse-tractusx/tractusx-edc/tree/main/charts/tractusx-connector>
+
+This chart uses Hashicorp Vault, which is expected to contain the following secrets on application start:
+
+- `daps-cert`: contains the x509 certificate of the connector.
+- `daps-key`: the private key of the x509 certificate
+- `aes-keys`: a 128bit, 256bit or 512bit string used to encrypt data. Must be stored in base64 format.
+
+These must be obtained from a DAPS instance, the process of which is out of the scope of this document. Alternatively,
+self-signed certificates can be used for testing:
+
 ```shell
-$ helm repo add catenax-ng-product-edc https://catenax-ng.github.io/product-edc
-$ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --version 0.3.0
+openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout daps.key -out daps.cert -subj "/CN=test"
+export DAPS_KEY="$(cat daps.key)"
+export DAPS_CERT="$(cat daps.cert)"
 ```
+
+## Launching the application
+
+The following requirements must be met before launching the application:
+
+- Write access to a HashiCorp Vault instance is required to run this chart
+- Secrets are seeded in advance
+
+Please also consider using [this example configuration](https://github.com/eclipse-tractusx/tractusx-edc/blob/main/edc-tests/deployment/src/main/resources/helm/tractusx-connector-test.yaml)
+to launch the application.
+Combined, run this shell command to start the in-memory Tractus-X EDC runtime:
+
+```shell
+helm repo add tractusx-edc https://eclipse-tractusx.github.io/charts/dev
+helm install my-release tractusx-edc/tractusx-connector-azure-vault --version 0.4.1 \
+     -f <path-to>/tractusx-connector-test.yaml
+```
+
+## Source Code
+
+* <https://github.com/eclipse-tractusx/tractusx-edc/tree/main/charts/tractusx-connector>
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| file://./subcharts/omejdn | daps(daps) | 0.0.1 |
+| https://charts.bitnami.com/bitnami | postgresql(postgresql) | 12.1.6 |
+| https://helm.releases.hashicorp.com | vault(vault) | 0.20.0 |
 
 ## Values
 
@@ -21,29 +64,31 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | controlplane.autoscaling.minReplicas | int | `1` | Minimal replicas if resource consumption falls below resource threshholds |
 | controlplane.autoscaling.targetCPUUtilizationPercentage | int | `80` | targetAverageUtilization of cpu provided to a pod |
 | controlplane.autoscaling.targetMemoryUtilizationPercentage | int | `80` | targetAverageUtilization of memory provided to a pod |
+| controlplane.businessPartnerValidation.log.agreementValidation | bool | `true` |  |
 | controlplane.debug.enabled | bool | `false` |  |
 | controlplane.debug.port | int | `1044` |  |
 | controlplane.debug.suspendOnStart | bool | `false` |  |
-| controlplane.endpoints | object | `{"control":{"path":"/control","port":8083},"data":{"authKey":"","path":"/data","port":8081},"default":{"path":"/api","port":8080},"ids":{"path":"/api/v1/ids","port":8084},"metrics":{"path":"/metrics","port":8085},"validation":{"path":"/validation","port":8082}}` | endpoints of the control plane |
+| controlplane.endpoints | object | `{"control":{"path":"/control","port":8083},"default":{"path":"/api","port":8080},"management":{"authKey":"","path":"/management","port":8081},"metrics":{"path":"/metrics","port":9090},"observability":{"insecure":true,"path":"/observability","port":8085},"protocol":{"path":"/api/v1/dsp","port":8084}}` | endpoints of the control plane |
 | controlplane.endpoints.control | object | `{"path":"/control","port":8083}` | control api, used for internal control calls. can be added to the internal ingress, but should probably not |
 | controlplane.endpoints.control.path | string | `"/control"` | path for incoming api calls |
 | controlplane.endpoints.control.port | int | `8083` | port for incoming api calls |
-| controlplane.endpoints.data | object | `{"authKey":"","path":"/data","port":8081}` | data management api, used by internal users, can be added to an ingress and must not be internet facing |
-| controlplane.endpoints.data.authKey | string | `""` | authentication key, must be attached to each 'X-Api-Key' request header |
-| controlplane.endpoints.data.path | string | `"/data"` | path for incoming api calls |
-| controlplane.endpoints.data.port | int | `8081` | port for incoming api calls |
 | controlplane.endpoints.default | object | `{"path":"/api","port":8080}` | default api for health checks, should not be added to any ingress |
 | controlplane.endpoints.default.path | string | `"/api"` | path for incoming api calls |
 | controlplane.endpoints.default.port | int | `8080` | port for incoming api calls |
-| controlplane.endpoints.ids | object | `{"path":"/api/v1/ids","port":8084}` | ids api, used for inter connector communication and must be internet facing |
-| controlplane.endpoints.ids.path | string | `"/api/v1/ids"` | path for incoming api calls |
-| controlplane.endpoints.ids.port | int | `8084` | port for incoming api calls |
-| controlplane.endpoints.metrics | object | `{"path":"/metrics","port":8085}` | metrics api, used for application metrics, must not be internet facing |
+| controlplane.endpoints.management | object | `{"authKey":"","path":"/management","port":8081}` | data management api, used by internal users, can be added to an ingress and must not be internet facing |
+| controlplane.endpoints.management.authKey | string | `""` | authentication key, must be attached to each 'X-Api-Key' request header |
+| controlplane.endpoints.management.path | string | `"/management"` | path for incoming api calls |
+| controlplane.endpoints.management.port | int | `8081` | port for incoming api calls |
+| controlplane.endpoints.metrics | object | `{"path":"/metrics","port":9090}` | metrics api, used for application metrics, must not be internet facing |
 | controlplane.endpoints.metrics.path | string | `"/metrics"` | path for incoming api calls |
-| controlplane.endpoints.metrics.port | int | `8085` | port for incoming api calls |
-| controlplane.endpoints.validation | object | `{"path":"/validation","port":8082}` | validation api, only used by the data plane and should not be added to any ingress |
-| controlplane.endpoints.validation.path | string | `"/validation"` | path for incoming api calls |
-| controlplane.endpoints.validation.port | int | `8082` | port for incoming api calls |
+| controlplane.endpoints.metrics.port | int | `9090` | port for incoming api calls |
+| controlplane.endpoints.observability | object | `{"insecure":true,"path":"/observability","port":8085}` | observability api with unsecured access, must not be internet facing |
+| controlplane.endpoints.observability.insecure | bool | `true` | allow or disallow insecure access, i.e. access without authentication |
+| controlplane.endpoints.observability.path | string | `"/observability"` | observability api, provides /health /readiness and /liveness endpoints |
+| controlplane.endpoints.observability.port | int | `8085` | port for incoming API calls |
+| controlplane.endpoints.protocol | object | `{"path":"/api/v1/dsp","port":8084}` | ids api, used for inter connector communication and must be internet facing |
+| controlplane.endpoints.protocol.path | string | `"/api/v1/dsp"` | path for incoming api calls |
+| controlplane.endpoints.protocol.port | int | `8084` | port for incoming api calls |
 | controlplane.env | object | `{}` |  |
 | controlplane.envConfigMapNames | list | `[]` |  |
 | controlplane.envSecretNames | list | `[]` |  |
@@ -56,7 +101,7 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | controlplane.ingresses[0].certManager.issuer | string | `""` | If preset enables certificate generation via cert-manager namespace scoped issuer |
 | controlplane.ingresses[0].className | string | `""` | Defines the [ingress class](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class)  to use |
 | controlplane.ingresses[0].enabled | bool | `false` |  |
-| controlplane.ingresses[0].endpoints | list | `["ids"]` | EDC endpoints exposed by this ingress resource |
+| controlplane.ingresses[0].endpoints | list | `["protocol"]` | EDC endpoints exposed by this ingress resource |
 | controlplane.ingresses[0].hostname | string | `"edc-control.local"` | The hostname to be used to precisely map incoming traffic onto the underlying network service |
 | controlplane.ingresses[0].tls | object | `{"enabled":false,"secretName":""}` | TLS [tls class](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls) applied to the ingress resource |
 | controlplane.ingresses[0].tls.enabled | bool | `false` | Enables TLS on the ingress resource |
@@ -66,7 +111,7 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | controlplane.ingresses[1].certManager.issuer | string | `""` | If preset enables certificate generation via cert-manager namespace scoped issuer |
 | controlplane.ingresses[1].className | string | `""` | Defines the [ingress class](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class)  to use |
 | controlplane.ingresses[1].enabled | bool | `false` |  |
-| controlplane.ingresses[1].endpoints | list | `["data","control"]` | EDC endpoints exposed by this ingress resource |
+| controlplane.ingresses[1].endpoints | list | `["management","control"]` | EDC endpoints exposed by this ingress resource |
 | controlplane.ingresses[1].hostname | string | `"edc-control.intranet"` | The hostname to be used to precisely map incoming traffic onto the underlying network service |
 | controlplane.ingresses[1].tls | object | `{"enabled":false,"secretName":""}` | TLS [tls class](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls) applied to the ingress resource |
 | controlplane.ingresses[1].tls.enabled | bool | `false` | Enables TLS on the ingress resource |
@@ -84,7 +129,7 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | controlplane.livenessProbe.periodSeconds | int | `10` | this fields specifies that kubernetes should perform a liveness check every 10 seconds |
 | controlplane.livenessProbe.successThreshold | int | `1` | number of consecutive successes for the probe to be considered successful after having failed |
 | controlplane.livenessProbe.timeoutSeconds | int | `5` | number of seconds after which the probe times out |
-| controlplane.logging | string | `".level=INFO\nhandlers=java.util.logging.ConsoleHandler\njava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\njava.util.logging.SimpleFormatter.format=[%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS] [%4$-7s] %5$s%6$s%n"` | configuration of the [Java Util Logging Facade](https://docs.oracle.com/javase/7/docs/technotes/guides/logging/overview.html) |
+| controlplane.logging | string | `".level=INFO\norg.eclipse.edc.level=ALL\nhandlers=java.util.logging.ConsoleHandler\njava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\njava.util.logging.ConsoleHandler.level=ALL\njava.util.logging.SimpleFormatter.format=[%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS] [%4$-7s] %5$s%6$s%n"` | configuration of the [Java Util Logging Facade](https://docs.oracle.com/javase/7/docs/technotes/guides/logging/overview.html) |
 | controlplane.nodeSelector | object | `{}` |  |
 | controlplane.opentelemetry | string | `"otel.javaagent.enabled=false\notel.javaagent.debug=false"` | configuration of the [Open Telemetry Agent](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/) to collect and expose metrics |
 | controlplane.podAnnotations | object | `{}` | additional annotations for the pod |
@@ -116,6 +161,11 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | controlplane.volumes | list | `[]` | [volume](https://kubernetes.io/docs/concepts/storage/volumes/) directories |
 | customLabels | object | `{}` |  |
 | daps.clientId | string | `""` |  |
+| daps.connectors[0].attributes.referringConnector | string | `"http://sokrates-controlplane/BPNSOKRATES"` |  |
+| daps.connectors[0].certificate | string | `""` |  |
+| daps.connectors[0].id | string | `"E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65:keyid:E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65"` |  |
+| daps.connectors[0].name | string | `"sokrates"` |  |
+| daps.fullnameOverride | string | `"daps"` |  |
 | daps.paths.jwks | string | `"/jwks.json"` |  |
 | daps.paths.token | string | `"/token"` |  |
 | daps.url | string | `""` |  |
@@ -136,11 +186,14 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | dataplane.endpoints.default.path | string | `"/api"` |  |
 | dataplane.endpoints.default.port | int | `8080` |  |
 | dataplane.endpoints.metrics.path | string | `"/metrics"` |  |
-| dataplane.endpoints.metrics.port | int | `8084` |  |
+| dataplane.endpoints.metrics.port | int | `9090` |  |
+| dataplane.endpoints.observability.insecure | bool | `true` | allow or disallow insecure access, i.e. access without authentication |
+| dataplane.endpoints.observability.path | string | `"/observability"` | observability api, provides /health /readiness and /liveness endpoints |
+| dataplane.endpoints.observability.port | int | `8085` | port for incoming API calls |
+| dataplane.endpoints.proxy.path | string | `"/proxy"` |  |
+| dataplane.endpoints.proxy.port | int | `8186` |  |
 | dataplane.endpoints.public.path | string | `"/api/public"` |  |
 | dataplane.endpoints.public.port | int | `8081` |  |
-| dataplane.endpoints.validation.path | string | `"/validation"` |  |
-| dataplane.endpoints.validation.port | int | `8082` |  |
 | dataplane.env | object | `{}` |  |
 | dataplane.envConfigMapNames | list | `[]` |  |
 | dataplane.envSecretNames | list | `[]` |  |
@@ -165,7 +218,7 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | dataplane.livenessProbe.periodSeconds | int | `10` | this fields specifies that kubernetes should perform a liveness check every 10 seconds |
 | dataplane.livenessProbe.successThreshold | int | `1` | number of consecutive successes for the probe to be considered successful after having failed |
 | dataplane.livenessProbe.timeoutSeconds | int | `5` | number of seconds after which the probe times out |
-| dataplane.logging | string | `".level=INFO\nhandlers=java.util.logging.ConsoleHandler\njava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\njava.util.logging.SimpleFormatter.format=[%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS] [%4$-7s] %5$s%6$s%n"` | configuration of the [Java Util Logging Facade](https://docs.oracle.com/javase/7/docs/technotes/guides/logging/overview.html) |
+| dataplane.logging | string | `".level=INFO\norg.eclipse.edc.level=ALL\nhandlers=java.util.logging.ConsoleHandler\njava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\njava.util.logging.ConsoleHandler.level=ALL\njava.util.logging.SimpleFormatter.format=[%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS] [%4$-7s] %5$s%6$s%n"` | configuration of the [Java Util Logging Facade](https://docs.oracle.com/javase/7/docs/technotes/guides/logging/overview.html) |
 | dataplane.nodeSelector | object | `{}` |  |
 | dataplane.opentelemetry | string | `"otel.javaagent.enabled=false\notel.javaagent.debug=false"` | configuration of the [Open Telemetry Agent](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/) to collect and expose metrics |
 | dataplane.podAnnotations | object | `{}` | additional annotations for the pod |
@@ -196,23 +249,25 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | dataplane.volumeMounts | list | `[]` | declare where to mount [volumes](https://kubernetes.io/docs/concepts/storage/volumes/) into the container |
 | dataplane.volumes | list | `[]` | [volume](https://kubernetes.io/docs/concepts/storage/volumes/) directories |
 | fullnameOverride | string | `""` |  |
+| idsdaps.connectors[0].certificate | string | `""` |  |
 | imagePullSecrets | list | `[]` | Existing image pull secret to use to [obtain the container image from private registries](https://kubernetes.io/docs/concepts/containers/images/#using-a-private-registry) |
+| install.daps | bool | `true` |  |
+| install.postgresql | bool | `true` |  |
+| install.vault | bool | `true` |  |
 | nameOverride | string | `""` |  |
-| postgresql.enabled | bool | `false` |  |
+| participant.id | string | `""` |  |
+| postgresql.auth.database | string | `"edc"` |  |
+| postgresql.auth.password | string | `"password"` |  |
+| postgresql.auth.username | string | `"user"` |  |
+| postgresql.fullnameOverride | string | `"postgresql"` |  |
 | postgresql.jdbcUrl | string | `""` |  |
-| postgresql.password | string | `""` |  |
-| postgresql.username | string | `""` |  |
+| postgresql.primary.persistence.enabled | bool | `false` |  |
+| postgresql.readReplicas.persistence.enabled | bool | `false` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.imagePullSecrets | list | `[]` | Existing image pull secret bound to the service account to use to [obtain the container image from private registries](https://kubernetes.io/docs/concepts/containers/images/#using-a-private-registry) |
 | serviceAccount.name | string | `""` |  |
-| vault.azure.certificate | string | `""` |  |
-| vault.azure.client | string | `""` |  |
-| vault.azure.enabled | bool | `false` |  |
-| vault.azure.name | string | `""` |  |
-| vault.azure.secret | string | `""` |  |
-| vault.azure.tenant | string | `""` |  |
-| vault.hashicorp.enabled | bool | `false` |  |
+| vault.fullnameOverride | string | `"vault"` |  |
 | vault.hashicorp.healthCheck.enabled | bool | `true` |  |
 | vault.hashicorp.healthCheck.standbyOk | bool | `true` |  |
 | vault.hashicorp.paths.health | string | `"/v1/sys/health"` |  |
@@ -220,11 +275,15 @@ $ helm install tractusx-connector catenax-ng-product-edc/tractusx-connector --ve
 | vault.hashicorp.timeout | int | `30` |  |
 | vault.hashicorp.token | string | `""` |  |
 | vault.hashicorp.url | string | `""` |  |
+| vault.injector.enabled | bool | `false` |  |
 | vault.secretNames.dapsPrivateKey | string | `"daps-private-key"` |  |
 | vault.secretNames.dapsPublicKey | string | `"daps-public-key"` |  |
 | vault.secretNames.transferProxyTokenEncryptionAesKey | string | `"transfer-proxy-token-encryption-aes-key"` |  |
 | vault.secretNames.transferProxyTokenSignerPrivateKey | string | `"transfer-proxy-token-signer-private-key"` |  |
 | vault.secretNames.transferProxyTokenSignerPublicKey | string | `"transfer-proxy-token-signer-public-key"` |  |
+| vault.server.dev.devRootToken | string | `"root"` |  |
+| vault.server.dev.enabled | bool | `true` |  |
+| vault.server.postStart | string | `nil` |  |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.10.0](https://github.com/norwoodj/helm-docs/releases/v1.10.0)
