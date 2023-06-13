@@ -26,9 +26,6 @@ global:
       # management login credentials for daps-server (password)
       clientSecret: &dapsClientSecret ThisiSaSuPERSecretPassword1!11
 
-  edc:
-    enabled: true
-
     consumer:
       daps:
         # identity of the EDC (consumer) at daps-server
