@@ -45,6 +45,7 @@ dependencies:
     name: tractusx-connector
     version: 0.4.1
     # repository: https://eclipse-tractusx.github.io/charts/dev
+    repository: file://./subcharts/tractusx-connector
     condition: global.edc.enabled
   # edc provider
   - alias: edcprovider

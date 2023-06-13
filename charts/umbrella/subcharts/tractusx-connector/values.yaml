@@ -489,8 +489,7 @@ dataplane:
     # -- Explicitly declared url for reaching the public api (e.g. if ingresses not used)
     public: ""
 postgresql:
-  jdbcUrl: ""
-  fullnameOverride: "postgresql"
+  jdbcUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/edc"
   primary:
     persistence:
       enabled: false
@@ -499,20 +498,20 @@ postgresql:
       enabled: false
   auth:
     database: "edc"
-    username: "user"
-    password: "password"
+    username: "user" # TODO: remove maybe
+    password: "password" # TODO: remove
 vault:
-  fullnameOverride: "vault"
+  # fullnameOverride: "vault"
   injector:
     enabled: false
   server:
     dev:
       enabled: true
-      devRootToken: "root"
+      devRootToken: "root" # TODO: empty value would be better?
     # Must be the same certificate that is configured in section 'daps'
     postStart:    # must be set externally!
   hashicorp:
-    url: ""
+    url: "http://{{ .Release.Name }}-vault:8200"
     token: ""
     timeout: 30
     healthCheck:
@@ -528,19 +527,15 @@ vault:
     dapsPrivateKey: daps-private-key
     dapsPublicKey: daps-public-key
 daps:
-  fullnameOverride: "daps"
-  url: ""
+  # url: ""
   clientId: ""
-  paths:
-    jwks: /jwks.json
-    token: /token
-  connectors:
-    - id: E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65:keyid:E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65
-      name: sokrates
-      attributes:
-        referringConnector: http://sokrates-controlplane/BPNSOKRATES
-      # Must be the same certificate that is stores in section 'sokrates-vault'
-      certificate: ""    # must be set externally!
+  # connectors:
+  #   - id: E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65:keyid:E7:07:2D:74:56:66:31:F0:7B:10:EA:B6:03:06:4C:23:7F:ED:A6:65
+  #     name: sokrates
+  #     attributes:
+  #       referringConnector: http://sokrates-controlplane/BPNSOKRATES
+  #     # Must be the same certificate that is stores in section 'sokrates-vault'
+  #     certificate: ""    # must be set externally!
 backendService:
   httpProxyTokenReceiverUrl: ""
 serviceAccount:
