@@ -49,7 +49,10 @@ dependencies:
     condition: global.edc.enabled
   # edc provider
   - alias: edcprovider
-    name: tractusx-connector
+    name: tractusx-connector-provider
     version: 0.4.1
     # repository: https://eclipse-tractusx.github.io/charts/dev
+    # locally mirrored with another name to be able to add dependency multiple times without side effects of its dependencies
+    # if the chart is linked with the same directory the daps-server will not be configurable
+    repository: file://./subcharts/tractusx-connector-provider
     condition: global.edc.enabled
