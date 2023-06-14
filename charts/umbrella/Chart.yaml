@@ -41,10 +41,12 @@ dependencies:
   # edc consumer
   - alias: edcconsumer
     name: tractusx-connector
-    version: 0.4.1
-    repository: https://eclipse-tractusx.github.io/charts/dev
+    version: 0.4.6
+    # repository: https://eclipse-tractusx.github.io/charts/dev
+    repository: https://mercedes-benz.github.io/eclipse-tractusx_tractusx-edc-merge
   # edc provider
   - alias: edcprovider
     name: tractusx-connector
-    version: 0.4.1
-    repository: https://eclipse-tractusx.github.io/charts/dev
+    version: 0.4.6
+    # repository: https://eclipse-tractusx.github.io/charts/dev
+    repository: https://mercedes-benz.github.io/eclipse-tractusx_tractusx-edc-merge

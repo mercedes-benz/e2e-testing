@@ -1,0 +1,24 @@
+global:
+  tag: &imageTag 0.4.1
+
+edcconsumer:
+  controlplane:
+    image:
+      # repository: ""
+      tag: *imageTag
+
+  dataplane:
+    image:
+      # repository: ""
+      tag: *imageTag
+
+edcprovider:
+  controlplane:
+    image:
+      # repository: ""
+      tag: *imageTag
+
+  dataplane:
+    image:
+      # repository: ""
+      tag: *imageTag
