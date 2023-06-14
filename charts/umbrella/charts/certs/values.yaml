@@ -18,7 +18,7 @@
 # #############################################################################
 ---
 daps:
-  url: http://{{ .Release.Name }}-daps-server:4567
+  url: http://{{ .Release.Name }}-daps:4567
 
   auth:
     clientId: ""

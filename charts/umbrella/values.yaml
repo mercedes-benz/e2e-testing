@@ -118,10 +118,6 @@ edcconsumer:
         authKey: consumer-authkey
 
   daps:
-    # when using an alias for the dep-chart the name will be the alias instead
-    # with the nameOverride the service name will be "{{ .Release.Name }}-daps-server"
-    nameOverride: daps-server
-
     clientId: *edcConsumerDapsClientId
 
     daps:
