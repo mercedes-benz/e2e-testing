@@ -41,14 +41,12 @@ dependencies:
   # edc consumer
   - alias: edcconsumer
     name: tractusx-connector
-    version: 0.4.1
+    version: 0.4.6
     # repository: https://eclipse-tractusx.github.io/charts/dev
-    repository: file://./subcharts/tractusx-connector
+    repository: https://mercedes-benz.github.io/eclipse-tractusx_tractusx-edc-merge
   # edc provider
   - alias: edcprovider
-    name: tractusx-connector-provider
-    version: 0.4.1
+    name: tractusx-connector
+    version: 0.4.6
     # repository: https://eclipse-tractusx.github.io/charts/dev
-    # locally mirrored with another name to be able to add dependency multiple times without side effects of its dependencies
-    # if the chart is linked with the same directory the daps-server will not be configurable
-    repository: file://./subcharts/tractusx-connector-provider
+    repository: https://mercedes-benz.github.io/eclipse-tractusx_tractusx-edc-merge
