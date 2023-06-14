@@ -1,9 +1,0 @@
-apiVersion: v2
-appVersion: 1.7.1
-description: DAPS server helm-chart
-name: daps-server
-sources:
-- https://github.com/eclipse-tractusx/daps-helm-chart
-type: application
-# This version is v1.7.10 with manual added PR41
-version: 1.7.10-with-PR41
