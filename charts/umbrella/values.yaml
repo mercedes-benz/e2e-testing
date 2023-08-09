@@ -123,9 +123,6 @@ daps:
       clientId: *dapsClientId
       clientSecret: *dapsClientSecret
 
-  image:
-    repository: ghcr.io/fraunhofer-aisec/omejdn-server
-
   networkPolicy:
     enabled: true
 
