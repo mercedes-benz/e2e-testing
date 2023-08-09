@@ -119,7 +119,7 @@ edcconsumer:
   nameOverride: edcconsumer
 
   install:
-    daps: true
+    daps: false
     postgresql: true
     vault: true
 
