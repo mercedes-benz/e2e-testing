@@ -115,6 +115,20 @@ certsprovider:
       privateKey: *edcProviderVaultTransferPrivateKey
       publicKey: *edcProviderVaultTransferPublicKey
 
+daps:
+  clientId: *edcConsumerDapsClientId
+
+  daps:
+    secret:
+      clientId: *dapsClientId
+      clientSecret: *dapsClientSecret
+
+  image:
+    repository: ghcr.io/fraunhofer-aisec/omejdn-server
+
+  networkPolicy:
+    enabled: true
+
 edcconsumer:
   nameOverride: edcconsumer
 
@@ -137,23 +151,7 @@ edcconsumer:
       tag: *edcImageTag
 
   daps:
-    clientId: *edcConsumerDapsClientId
-
-    daps:
-      secret:
-        clientId: *dapsClientId
-        clientSecret: *dapsClientSecret
-
-    image:
-      repository: ghcr.io/fraunhofer-aisec/omejdn-server
-
-    # podSecurityContext:
-    #   fsGroup: 1000
-    #   runAsNonRoot: true
-    #   runAsUser: 1000
-    #   runAsGroup: 1000
-    # persistence:
-    #   accessMode: "ReadWriteOnce"
+    clientId: *edcProviderDapsClientId
 
   dataplane:
     image:
