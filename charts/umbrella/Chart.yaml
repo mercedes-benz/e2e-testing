@@ -43,7 +43,7 @@ dependencies:
   - alias: daps
     name: daps-server
     version: 1.8.0
-    repository: "file://./subcharts/daps-server"
+    repository: https://eclipse-tractusx.github.io/charts/dev
 
   # edc consumer
   - alias: edcconsumer
