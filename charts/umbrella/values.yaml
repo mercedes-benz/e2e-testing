@@ -179,6 +179,16 @@ edcconsumer:
             app.kubernetes.io/instance: '{{ .Release.Name }}-controlplane'
 
     primary:
+      # in postgresql version 12.1.6 an empty initContainers will be templated
+      # kyverno will then expect runAsNonRoot to be set to true and fails
+      # therefore a dummy initContainer is added
+      # TODO: remove this section if psql was updated in tractusx-connector
+      initContainers:
+        - name: dummy
+          image: ghcr.io/taskmedia/scratch-success:main
+          securityContext:
+            runAsNonRoot: true
+
       podSecurityContext:
         enabled: true
         runAsNonRoot: true
@@ -261,6 +271,16 @@ edcprovider:
             app.kubernetes.io/instance: '{{ .Release.Name }}-controlplane'
 
     primary:
+      # in postgresql version 12.1.6 an empty initContainers will be templated
+      # kyverno will then expect runAsNonRoot to be set to true and fails
+      # therefore a dummy initContainer is added
+      # TODO: remove this section if psql was updated in tractusx-connector
+      initContainers:
+        - name: dummy
+          image: ghcr.io/taskmedia/scratch-success:main
+          securityContext:
+            runAsNonRoot: true
+
       podSecurityContext:
         enabled: true
         runAsNonRoot: true
