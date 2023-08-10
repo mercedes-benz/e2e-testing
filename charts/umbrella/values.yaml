@@ -178,6 +178,11 @@ edcconsumer:
             app.kubernetes.io/name: edcconsumer-controlplane
             app.kubernetes.io/instance: '{{ .Release.Name }}-controlplane'
 
+    primary:
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: true
+
     jdbcUrl: "jdbc:postgresql://{{ .Release.Name }}-consumer-postgresql:5432/edc"
 
     auth:
@@ -254,6 +259,11 @@ edcprovider:
           podSelector:
             app.kubernetes.io/name: edcprovider-controlplane
             app.kubernetes.io/instance: '{{ .Release.Name }}-controlplane'
+
+    primary:
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: true
 
   vault:
     hashicorp:
