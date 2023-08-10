@@ -148,7 +148,7 @@ edcconsumer:
       tag: *edcImageTag
 
   daps:
-    clientId: *edcProviderDapsClientId
+    clientId: *edcConsumerDapsClientId
 
   dataplane:
     image:
